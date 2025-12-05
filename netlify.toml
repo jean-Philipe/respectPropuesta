@@ -13,3 +13,64 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# Redirects para las funciones de API
+[[redirects]]
+  from = "/api/auth-login"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth-me"
+  to = "/.netlify/functions/auth-me"
+  status = 200
+
+[[redirects]]
+  from = "/api/users"
+  to = "/.netlify/functions/users"
+  status = 200
+
+[[redirects]]
+  from = "/api/users/*"
+  to = "/.netlify/functions/users"
+  status = 200
+
+[[redirects]]
+  from = "/api/events"
+  to = "/.netlify/functions/events"
+  status = 200
+
+[[redirects]]
+  from = "/api/events/*"
+  to = "/.netlify/functions/events"
+  status = 200
+
+[[redirects]]
+  from = "/api/providers"
+  to = "/.netlify/functions/providers"
+  status = 200
+
+[[redirects]]
+  from = "/api/providers/*"
+  to = "/.netlify/functions/providers"
+  status = 200
+
+[[redirects]]
+  from = "/api/permissions"
+  to = "/.netlify/functions/permissions"
+  status = 200
+
+[[redirects]]
+  from = "/api/permissions/*"
+  to = "/.netlify/functions/permissions"
+  status = 200
+
+[[redirects]]
+  from = "/api/event-data"
+  to = "/.netlify/functions/event-data"
+  status = 200
+
+[[redirects]]
+  from = "/api/event-data/*"
+  to = "/.netlify/functions/event-data"
+  status = 200
+

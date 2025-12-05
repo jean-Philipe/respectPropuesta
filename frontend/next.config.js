@@ -2,16 +2,21 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost'],
-    unoptimized: true, // Para desarrollo, permite imágenes sin optimizar
+    unoptimized: true, // Necesario para Netlify
   },
+  // En producción, las APIs se llaman directamente a /api/ que Netlify enruta a las funciones
+  // En desarrollo, usar el proxy si el backend está corriendo
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
-      },
-    ];
+    // Solo en desarrollo, si hay un backend corriendo
+    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_BACKEND === 'true') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:3001/api/:path*',
+        },
+      ];
+    }
+    return [];
   },
 }
 

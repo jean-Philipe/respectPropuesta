@@ -789,7 +789,7 @@ function DataList({ eventId, attributeId, data, loading, onRefresh }: any) {
                   {item.imageUrl && (
                     <div style={{ marginTop: '12px' }}>
                       <img
-                        src={`http://localhost:3001${item.imageUrl}`}
+                        src={item.imageUrl?.startsWith('http') ? item.imageUrl : item.imageUrl}
                         alt="Dato"
                         style={{
                           maxWidth: '200px',
@@ -876,18 +876,20 @@ function DataFormModal({ eventId, attributeId, onClose }: any) {
     setLoading(true);
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('eventId', eventId);
-      formDataToSend.append('eventAttributeId', attributeId);
-      formDataToSend.append('data', JSON.stringify(formData));
-      if (comment) formDataToSend.append('comment', comment);
-      if (image) formDataToSend.append('image', image);
+      // Para Netlify Functions, usamos JSON en lugar de FormData
+      // Las imágenes deben ser URLs, no archivos subidos
+      const payload: any = {
+        eventId,
+        eventAttributeId,
+        data: formData,
+      };
+      if (comment) payload.comment = comment;
+      // Si hay una imagen, debe ser una URL
+      if (image && (image as any).url) {
+        payload.imageUrl = (image as any).url;
+      }
 
-      await api.post('/event-data', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await api.post('/event-data', payload);
 
       onClose();
     } catch (err: any) {
@@ -941,15 +943,18 @@ function DataFormModal({ eventId, attributeId, onClose }: any) {
 
           <div className="form-group">
             <label className="form-label" htmlFor="image">
-              Imagen (opcional)
+              URL de Imagen (opcional)
             </label>
             <input
               id="image"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImage(e.target.files?.[0] || null)}
+              type="url"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              onChange={(e) => setImage(e.target.value ? { url: e.target.value } as any : null)}
               className="input"
             />
+            <p style={{ fontSize: '12px', color: '#636e72', marginTop: '4px' }}>
+              Ingresa la URL de una imagen externa
+            </p>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>

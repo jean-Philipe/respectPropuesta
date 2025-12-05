@@ -2,6 +2,17 @@
 
 Plataforma interna para la gestión de eventos y cálculo de huella de carbono de la empresa Respect.
 
+## 🚀 Deploy en Netlify
+
+Este proyecto está configurado para deployarse completamente en Netlify como un prototipo. Ver [DEPLOY.md](./DEPLOY.md) para instrucciones detalladas.
+
+**Configuración rápida:**
+1. Conecta tu repositorio a Netlify
+2. Netlify detectará automáticamente la configuración desde `netlify.toml`
+3. El deploy se realizará automáticamente
+
+**Nota**: La base de datos es en memoria y se reinicia entre invocaciones (solo para prototipos).
+
 ## 🚀 Características
 
 - **Gestión de Eventos**: Crea eventos con información flexible y dinámica

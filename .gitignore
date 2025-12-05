@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 */node_modules/
+**/node_modules/
 
 # Environment variables
 .env
@@ -11,6 +12,7 @@ node_modules/
 .next/
 dist/
 build/
+out/
 
 # Logs
 *.log
@@ -30,8 +32,11 @@ Thumbs.db
 
 # Uploads
 backend/uploads/
+netlify/functions/uploads/
 
 # Database
 *.db
 *.sqlite
 
+# Netlify
+.netlify/

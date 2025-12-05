@@ -1,7 +1,8 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// En Netlify, las funciones están en /api/, en desarrollo local puede ser localhost:3001
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '' : 'http://localhost:3001');
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,

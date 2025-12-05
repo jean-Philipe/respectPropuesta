@@ -880,7 +880,7 @@ function DataFormModal({ eventId, attributeId, onClose }: any) {
       // Las imágenes deben ser URLs, no archivos subidos
       const payload: any = {
         eventId,
-        eventAttributeId,
+        eventAttributeId: attributeId,
         data: formData,
       };
       if (comment) payload.comment = comment;

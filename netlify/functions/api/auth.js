@@ -21,12 +21,15 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    if (event.path.endsWith('/login')) {
+    // El path ya viene sin /api/auth, solo tiene /login o /me
+    const path = event.path;
+    
+    if (path === '/login' || path.endsWith('/login')) {
       if (event.httpMethod !== 'POST') {
         return { statusCode: 405, headers, body: JSON.stringify({ error: 'Método no permitido' }) };
       }
 
-      const { email, password } = JSON.parse(event.body);
+      const { email, password } = JSON.parse(event.body || '{}');
 
       if (!email || !password) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Email y contraseña son requeridos' }) };
@@ -65,7 +68,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    if (event.path.endsWith('/me')) {
+    if (path === '/me' || path.endsWith('/me')) {
       if (event.httpMethod !== 'GET') {
         return { statusCode: 405, headers, body: JSON.stringify({ error: 'Método no permitido' }) };
       }

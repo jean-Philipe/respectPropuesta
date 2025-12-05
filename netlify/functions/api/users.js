@@ -25,8 +25,13 @@ exports.handler = async (event, context) => {
   const user = authResult.user;
 
   try {
+    // El path ya viene sin /api/users
+    const path = event.path;
+    const pathParts = path.split('/').filter(p => p);
+    const userId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
+
     // GET /api/users
-    if (event.httpMethod === 'GET' && !event.path.includes('/')) {
+    if (event.httpMethod === 'GET' && !userId) {
       const adminError = requireAdmin(user);
       if (adminError) {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
@@ -37,8 +42,8 @@ exports.handler = async (event, context) => {
     }
 
     // GET /api/users/:id
-    if (event.httpMethod === 'GET' && event.path.includes('/')) {
-      const id = event.path.split('/').pop();
+    if (event.httpMethod === 'GET' && userId) {
+      const id = userId;
       if (user.role !== 'ADMIN' && user.id !== id) {
         return { statusCode: 403, headers, body: JSON.stringify({ error: 'Acceso denegado' }) };
       }
@@ -58,7 +63,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { email, password, name, role } = JSON.parse(event.body);
+      const { email, password, name, role } = JSON.parse(event.body || '{}');
 
       if (!email || !password || !name) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Email, contraseña y nombre son requeridos' }) };
@@ -81,14 +86,14 @@ exports.handler = async (event, context) => {
     }
 
     // PUT /api/users/:id
-    if (event.httpMethod === 'PUT') {
+    if (event.httpMethod === 'PUT' && userId) {
       const adminError = requireAdmin(user);
       if (adminError) {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const id = event.path.split('/').pop();
-      const { email, name, role, password } = JSON.parse(event.body);
+      const id = userId;
+      const { email, name, role, password } = JSON.parse(event.body || '{}');
 
       const updateData = {};
       if (email) updateData.email = email;
@@ -107,13 +112,13 @@ exports.handler = async (event, context) => {
     }
 
     // DELETE /api/users/:id
-    if (event.httpMethod === 'DELETE') {
+    if (event.httpMethod === 'DELETE' && userId) {
       const adminError = requireAdmin(user);
       if (adminError) {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const id = event.path.split('/').pop();
+      const id = userId;
       const deleted = await db.deleteUser(id);
       if (!deleted) {
         return { statusCode: 404, headers, body: JSON.stringify({ error: 'Usuario no encontrado' }) };

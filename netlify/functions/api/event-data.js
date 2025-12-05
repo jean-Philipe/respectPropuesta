@@ -23,10 +23,12 @@ exports.handler = async (event, context) => {
   const user = authResult.user;
 
   try {
-    const pathParts = event.path.split('/').filter(p => p);
-    const isAttributeRoute = event.path.includes('/attribute/');
-    const isEventRoute = event.path.includes('/event/');
-    const dataId = pathParts[pathParts.length - 1];
+    // El path ya viene sin /api/event-data
+    const path = event.path;
+    const pathParts = path.split('/').filter(p => p);
+    const isAttributeRoute = path.includes('/attribute/');
+    const isEventRoute = path.includes('/event/');
+    const dataId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
 
     // GET /api/event-data/attribute/:attributeId
     if (event.httpMethod === 'GET' && isAttributeRoute) {
@@ -80,7 +82,7 @@ exports.handler = async (event, context) => {
 
     // POST /api/event-data
     if (event.httpMethod === 'POST') {
-      const { eventId, eventAttributeId, data: dataValue, comment, imageUrl } = JSON.parse(event.body);
+      const { eventId, eventAttributeId, data: dataValue, comment, imageUrl } = JSON.parse(event.body || '{}');
 
       if (!eventId || !eventAttributeId || !dataValue) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Evento, atributo y datos son requeridos' }) };
@@ -131,7 +133,7 @@ exports.handler = async (event, context) => {
 
     // PUT /api/event-data/:id
     if (event.httpMethod === 'PUT') {
-      const { data: dataValue, comment, imageUrl } = JSON.parse(event.body);
+      const { data: dataValue, comment, imageUrl } = JSON.parse(event.body || '{}');
       const existingData = await db.findEventDataById(dataId);
 
       if (!existingData) {

@@ -23,10 +23,12 @@ exports.handler = async (event, context) => {
   const user = authResult.user;
 
   try {
-    const pathParts = event.path.split('/').filter(p => p);
-    const eventId = pathParts[pathParts.length - 1];
-    const isAttributeRoute = event.path.includes('/attributes');
-    const isProviderRoute = event.path.includes('/providers');
+    // El path ya viene sin /api/events
+    const path = event.path;
+    const pathParts = path.split('/').filter(p => p);
+    const eventId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
+    const isAttributeRoute = path.includes('/attributes');
+    const isProviderRoute = path.includes('/providers');
 
     // GET /api/events
     if (event.httpMethod === 'GET' && !eventId) {
@@ -70,7 +72,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { name, description, startDate, endDate, dynamicFields } = JSON.parse(event.body);
+      const { name, description, startDate, endDate, dynamicFields } = JSON.parse(event.body || '{}');
       const updateData = {};
       if (name) updateData.name = name;
       if (description !== undefined) updateData.description = description;
@@ -136,7 +138,7 @@ exports.handler = async (event, context) => {
       }
 
       const attributeId = pathParts[pathParts.length - 1];
-      const { name, dataType, allowImage, description } = JSON.parse(event.body);
+      const { name, dataType, allowImage, description } = JSON.parse(event.body || '{}');
       const updateData = {};
       if (name) updateData.name = name;
       if (dataType) updateData.dataType = dataType;
@@ -172,7 +174,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { providerId } = JSON.parse(event.body);
+      const { providerId } = JSON.parse(event.body || '{}');
       if (!providerId) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'ID del proveedor es requerido' }) };
       }

@@ -23,10 +23,12 @@ exports.handler = async (event, context) => {
   const user = authResult.user;
 
   try {
-    const pathParts = event.path.split('/').filter(p => p);
-    const isUserRoute = event.path.includes('/user/');
-    const isAttributeRoute = event.path.includes('/attribute/');
-    const permissionId = pathParts[pathParts.length - 1];
+    // El path ya viene sin /api/permissions
+    const path = event.path;
+    const pathParts = path.split('/').filter(p => p);
+    const isUserRoute = path.includes('/user/');
+    const isAttributeRoute = path.includes('/attribute/');
+    const permissionId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
 
     // GET /api/permissions/user/:userId
     if (event.httpMethod === 'GET' && isUserRoute) {
@@ -87,7 +89,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { userId, eventAttributeId, canCreate, canRead, canUpdate, canDelete } = JSON.parse(event.body);
+      const { userId, eventAttributeId, canCreate, canRead, canUpdate, canDelete } = JSON.parse(event.body || '{}');
       if (!userId || !eventAttributeId) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Usuario y atributo de evento son requeridos' }) };
       }
@@ -128,7 +130,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { canCreate, canRead, canUpdate, canDelete } = JSON.parse(event.body);
+      const { canCreate, canRead, canUpdate, canDelete } = JSON.parse(event.body || '{}');
       const updateData = {};
       if (canCreate !== undefined) updateData.canCreate = canCreate;
       if (canRead !== undefined) updateData.canRead = canRead;

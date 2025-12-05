@@ -23,10 +23,9 @@ exports.handler = async (event, context) => {
   const user = authResult.user;
 
   try {
-    // El path ya viene sin /api/events
-    const path = event.path;
+    const path = event.path || event.rawPath || '';
     const pathParts = path.split('/').filter(p => p);
-    const eventId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
+    const eventId = pathParts[pathParts.length - 1];
     const isAttributeRoute = path.includes('/attributes');
     const isProviderRoute = path.includes('/providers');
 
@@ -72,7 +71,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { name, description, startDate, endDate, dynamicFields } = JSON.parse(event.body || '{}');
+      const { name, description, startDate, endDate, dynamicFields } = JSON.parse(event.body);
       const updateData = {};
       if (name) updateData.name = name;
       if (description !== undefined) updateData.description = description;
@@ -138,7 +137,7 @@ exports.handler = async (event, context) => {
       }
 
       const attributeId = pathParts[pathParts.length - 1];
-      const { name, dataType, allowImage, description } = JSON.parse(event.body || '{}');
+      const { name, dataType, allowImage, description } = JSON.parse(event.body);
       const updateData = {};
       if (name) updateData.name = name;
       if (dataType) updateData.dataType = dataType;
@@ -174,7 +173,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { providerId } = JSON.parse(event.body || '{}');
+      const { providerId } = JSON.parse(event.body);
       if (!providerId) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'ID del proveedor es requerido' }) };
       }

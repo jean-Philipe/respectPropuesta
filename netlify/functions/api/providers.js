@@ -23,10 +23,9 @@ exports.handler = async (event, context) => {
   const user = authResult.user;
 
   try {
-    // El path ya viene sin /api/providers
-    const path = event.path;
+    const path = event.path || event.rawPath || '';
     const pathParts = path.split('/').filter(p => p);
-    const providerId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
+    const providerId = pathParts[pathParts.length - 1];
 
     // GET /api/providers
     if (event.httpMethod === 'GET' && !providerId) {
@@ -70,7 +69,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { name, email, phone, dynamicFields } = JSON.parse(event.body || '{}');
+      const { name, email, phone, dynamicFields } = JSON.parse(event.body);
       const updateData = {};
       if (name) updateData.name = name;
       if (email !== undefined) updateData.email = email;

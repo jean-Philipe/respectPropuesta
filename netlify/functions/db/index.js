@@ -30,15 +30,9 @@ class InMemoryDB {
   async initialize() {
     if (this.initialized) return;
     
-    try {
-      const seed = require('./seed');
-      await seed(this);
-      this.initialized = true;
-    } catch (error) {
-      console.error('Error inicializando seed:', error);
-      // Continuar aunque falle el seed
-      this.initialized = true;
-    }
+    const seed = require('./seed');
+    await seed(this);
+    this.initialized = true;
   }
 
   // Generar ID único

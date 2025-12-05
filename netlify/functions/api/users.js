@@ -25,13 +25,8 @@ exports.handler = async (event, context) => {
   const user = authResult.user;
 
   try {
-    // El path ya viene sin /api/users
-    const path = event.path;
-    const pathParts = path.split('/').filter(p => p);
-    const userId = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
-
     // GET /api/users
-    if (event.httpMethod === 'GET' && !userId) {
+    if (event.httpMethod === 'GET' && !event.path.includes('/')) {
       const adminError = requireAdmin(user);
       if (adminError) {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
@@ -42,18 +37,23 @@ exports.handler = async (event, context) => {
     }
 
     // GET /api/users/:id
-    if (event.httpMethod === 'GET' && userId) {
-      const id = userId;
-      if (user.role !== 'ADMIN' && user.id !== id) {
-        return { statusCode: 403, headers, body: JSON.stringify({ error: 'Acceso denegado' }) };
-      }
+    if (event.httpMethod === 'GET') {
+      const path = event.path || event.rawPath || '';
+      const pathParts = path.split('/').filter(p => p);
+      // Si hay más de 2 partes (api, users, id), entonces es GET /api/users/:id
+      if (pathParts.length > 2) {
+        const id = pathParts[pathParts.length - 1];
+        if (user.role !== 'ADMIN' && user.id !== id) {
+          return { statusCode: 403, headers, body: JSON.stringify({ error: 'Acceso denegado' }) };
+        }
 
-      const foundUser = await db.findUserById(id);
-      if (!foundUser) {
-        return { statusCode: 404, headers, body: JSON.stringify({ error: 'Usuario no encontrado' }) };
-      }
+        const foundUser = await db.findUserById(id);
+        if (!foundUser) {
+          return { statusCode: 404, headers, body: JSON.stringify({ error: 'Usuario no encontrado' }) };
+        }
 
-      return { statusCode: 200, headers, body: JSON.stringify(foundUser) };
+        return { statusCode: 200, headers, body: JSON.stringify(foundUser) };
+      }
     }
 
     // POST /api/users
@@ -63,7 +63,7 @@ exports.handler = async (event, context) => {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const { email, password, name, role } = JSON.parse(event.body || '{}');
+      const { email, password, name, role } = JSON.parse(event.body);
 
       if (!email || !password || !name) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Email, contraseña y nombre son requeridos' }) };
@@ -86,14 +86,16 @@ exports.handler = async (event, context) => {
     }
 
     // PUT /api/users/:id
-    if (event.httpMethod === 'PUT' && userId) {
+    if (event.httpMethod === 'PUT') {
       const adminError = requireAdmin(user);
       if (adminError) {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const id = userId;
-      const { email, name, role, password } = JSON.parse(event.body || '{}');
+      const path = event.path || event.rawPath || '';
+      const pathParts = path.split('/').filter(p => p);
+      const id = pathParts[pathParts.length - 1];
+      const { email, name, role, password } = JSON.parse(event.body);
 
       const updateData = {};
       if (email) updateData.email = email;
@@ -112,13 +114,15 @@ exports.handler = async (event, context) => {
     }
 
     // DELETE /api/users/:id
-    if (event.httpMethod === 'DELETE' && userId) {
+    if (event.httpMethod === 'DELETE') {
       const adminError = requireAdmin(user);
       if (adminError) {
         return { statusCode: adminError.statusCode, headers, body: JSON.stringify({ error: adminError.error }) };
       }
 
-      const id = userId;
+      const path = event.path || event.rawPath || '';
+      const pathParts = path.split('/').filter(p => p);
+      const id = pathParts[pathParts.length - 1];
       const deleted = await db.deleteUser(id);
       if (!deleted) {
         return { statusCode: 404, headers, body: JSON.stringify({ error: 'Usuario no encontrado' }) };

@@ -14,7 +14,7 @@ export interface AuthResponse {
 }
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', { email, password });
+  const response = await api.post<AuthResponse>('/auth-login', { email, password });
   if (response.data.token) {
     Cookies.set('token', response.data.token, { expires: 7 });
   }
@@ -30,7 +30,7 @@ export const logout = () => {
 
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    const response = await api.get<{ user: User }>('/auth/me');
+    const response = await api.get<{ user: User }>('/auth-me');
     return response.data.user;
   } catch {
     return null;
